@@ -26,5 +26,15 @@ CREATE TABLE IF NOT EXISTS deliveries
 	delivery_id SERIAL PRIMARY KEY,
 	order_id INT REFERENCES orders(order_id),
 	delivery_date DATE,
-	DELIVERY_STATUS TEXT
+	status TEXT
 );
+
+
+SELECT *
+FROM customers as c;
+
+SELECT *
+FROM orders as o;
+
+SELECT *
+FROM deliveries as d;
