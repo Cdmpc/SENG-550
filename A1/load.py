@@ -98,7 +98,7 @@ def main():
     
     # ========================== [DATABASE OPERATIONS] ================================== #
     conn = psql.connect(
-        host = "a1seng550dbi.cjcwea4ieepr.us-west-2.rds.amazonaws.com",
+        host = "a1seng550dbi.cjcwea4ieepr.us-west-2.rds.amazonaws.com", # NOTE: Could change to input so I can swap between AWS and my local server.
         database="A1_SENG550_DBI",
         user="postgres",
         password=PASSWORD
