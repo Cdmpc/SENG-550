@@ -81,14 +81,20 @@ def bulk_delete(table_name, df_arg, conn_arg, cursor_arg):
 
 def main():
     # Read the csv files into panda dataframes.
-    cust_df = pd.read_csv(filepath_or_buffer="./CSVs/customers.csv");
-    ord_df = pd.read_csv(filepath_or_buffer="./CSVs/orders.csv");
-    del_df = pd.read_csv(filepath_or_buffer="./CSVs/deliveries.csv");
+    cust_df = pd.read_csv(filepath_or_buffer="./A1/CSV/customers.csv");
+    ord_df = pd.read_csv(filepath_or_buffer="./A1/CSV/orders.csv");
+    del_df = pd.read_csv(filepath_or_buffer="./A1/CSV/deliveries.csv");
 
     # List of dataframes.
     dataframes_list = [cust_df, ord_df, del_df];
 
-    PASSWORD = dotenv.get_key(dotenv_path="../.env", key_to_get="DB_PASSWORD"); # Stores the password safely away.
+    want_to_delete = int(input("Bulk Delete values in table after insertion? [1 for Yes, 0 for No]: "));
+    print("You inputted:", want_to_delete);
+    if(want_to_delete != 1 and want_to_delete != 0):
+        print("Incorrect Response, please only use 1 or 0 to answer");
+        return;
+
+    PASSWORD = dotenv.get_key(dotenv_path="./.env", key_to_get="DB_PASSWORD"); # Stores the password safely away.
     
     # ========================== [DATABASE OPERATIONS] ================================== #
     conn = psql.connect(
@@ -132,9 +138,11 @@ def main():
         
 
         # Drop the tables (ONLY ALLOWED IF THE TABLES ALREADY EXIST.)
-        # bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="deliveries", df_arg=del_df);
-        # bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="orders", df_arg=ord_df);
-        # bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="customers", df_arg=cust_df);
+        if(want_to_delete == 1):
+            print("Using bulk delete...\n");
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="deliveries", df_arg=del_df);
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="orders", df_arg=ord_df);
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="customers", df_arg=cust_df);
 
         # Close the cursor and database connection ALWAYS, when done.
         psql_cursor.close();
