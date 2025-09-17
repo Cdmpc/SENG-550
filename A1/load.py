@@ -123,13 +123,13 @@ def main():
         if(cust_flag == 1):
             ord_flag = insert_bulk(table_name="orders", df_arg=ord_df, cursor_arg=psql_cursor, conn_arg=conn);
         else:
-            print("Customer Insertion failed...\n");
+            print("Customer Insertion failed, Orders table remains untouched...\n");
         
         # Only insert into Deliveries, if inserting into Orders was successful.
         if(ord_flag == 1):
             del_flag = insert_bulk(table_name="deliveries", df_arg=del_df, cursor_arg=psql_cursor, conn_arg=conn);
         else:
-            print("Order Insertion failed...\n");
+            print("Order Insertion failed, Delivieries table remains untouched...\n");
         
         if(del_flag == -1):
             print("Delivery Insertion failed...\n");
