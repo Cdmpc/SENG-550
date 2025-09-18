@@ -136,12 +136,24 @@ def main():
         print("Incorrect Response, please only use 1 or 0 to answer");
         return;
 
-    PASSWORD = dotenv.get_key(dotenv_path="./.env", key_to_get="DB_PASSWORD"); # Stores the password safely away.
-    
+    PASSWORD = str(dotenv.get_key(dotenv_path="./.env", key_to_get="DB_PASSWORD")); # Stores the password safely away.
+    ENDPOINT = str(dotenv.get_key(dotenv_path="./.env", key_to_get="DB_ENDPOINT"));
     # ========================== [STEP 2: DATABASE OPERATIONS] ================================== #
+    DATABASE_NAME = str();
+    db_server_in = input("Please input the DB Endpoint server you want to connect to (or type localhost): ").strip().lower();
+    
+    if(db_server_in == ENDPOINT):
+        DATABASE_NAME = str("A1_SENG550_DBI");
+    elif(db_server_in == "localhost"):
+        ENDPOINT = str("localhost");
+        DATABASE_NAME = str("A1_SENG550_DBLOCAL");
+    else:
+        print("Endpoint string is NOT VALID, please add your endpoint to your own .env file under the key DB_ENDPOINT.");
+        return;
+
     conn = psql.connect(
-        host = "a1seng550dbi.cjcwea4ieepr.us-west-2.rds.amazonaws.com", # NOTE: Could change to input so I can swap between AWS and my local server.
-        database="A1_SENG550_DBI",
+        host= ENDPOINT, # NOTE: Could change to input so I can swap between AWS and my local server.
+        database=DATABASE_NAME,
         user="postgres",
         password=PASSWORD
     );
