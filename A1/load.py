@@ -129,8 +129,7 @@ def main():
     # List of dataframes.
     dataframes_list = [cust_df, ord_df, del_df];
 
-    want_to_delete = int(input("""NOTE: Highly recommend after a run or error to input (1), then run again with (0)
-                               \nBulk Delete values in table after insertion? [1 for Yes, 0 for No]: """));
+    want_to_delete = int(input("""Bulk Delete values in tables? [1 for Yes, 0 for No]\nNOTE: Recommend to run (1) first to start on fresh tables, then run (0) afterwards: """));
     print("You inputted:", want_to_delete);
     if(want_to_delete != 1 and want_to_delete != 0):
         print("Incorrect Response, please only use 1 or 0 to answer");
@@ -271,7 +270,7 @@ def main():
         new_cust = {
             "name": "Carlos Morera Pinilla",
             "email": "carlos.morerapinilla@ucalgary.ca",
-            "phone": "4031234567",
+            "phone": "123-4567",
             "address": "1902 Starlight Blvd"
         }
         new_cust_id = single_insert(table_name="customers", row_dict=new_cust, returning_col="customer_id", cursor_arg=psql_cursor, conn_arg=conn);
