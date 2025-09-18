@@ -86,7 +86,7 @@ def main():
     # List of dataframes.
     dataframes_list = [cust_df, ord_df, del_df];
 
-    want_to_delete = int(input("""NOTE: It is recommended to say Yes(1) on first run, then say No(0) on the second run
+    want_to_delete = int(input("""NOTE: Highly recommend after a run or error to input (1), then run again with (0)
                                \nBulk Delete values in table after insertion? [1 for Yes, 0 for No]: """));
     print("You inputted:", want_to_delete);
     if(want_to_delete != 1 and want_to_delete != 0):
