@@ -31,7 +31,8 @@ def insert_bulk(table_name, df_arg, cursor_arg, conn_arg):
         print(f"Error adding unique constraint to {table_name}: {e}")
         return -1;
 
-    # BULK INSERTION HAPPENS HERE.
+    # BULK INSERTION HAPPENS HERE, if the exact same thing already exists, do not add it
+    # to the table.
     query = f"""
     INSERT INTO {table_name} ({cols}) 
     VALUES %s
@@ -75,12 +76,9 @@ def bulk_delete(table_name, df_arg, conn_arg, cursor_arg):
         print(f"Error bulk deleting {table_name}: {e}");
         return -1;
 
-
-
 # ==================================================== [MAIN FUNCTION] =================================================================== #
-
 def main():
-    # Read the csv files into panda dataframes.
+    # STEP 1: Read the csv files into panda dataframes.
     cust_df = pd.read_csv(filepath_or_buffer="./A1/CSV/customers.csv");
     ord_df = pd.read_csv(filepath_or_buffer="./A1/CSV/orders.csv");
     del_df = pd.read_csv(filepath_or_buffer="./A1/CSV/deliveries.csv");
@@ -88,7 +86,8 @@ def main():
     # List of dataframes.
     dataframes_list = [cust_df, ord_df, del_df];
 
-    want_to_delete = int(input("Bulk Delete values in table after insertion? [1 for Yes, 0 for No]: "));
+    want_to_delete = int(input("""NOTE: It is recommended to say Yes(1) on first run, then say No(0) on the second run
+                               \nBulk Delete values in table after insertion? [1 for Yes, 0 for No]: """));
     print("You inputted:", want_to_delete);
     if(want_to_delete != 1 and want_to_delete != 0):
         print("Incorrect Response, please only use 1 or 0 to answer");
@@ -96,7 +95,7 @@ def main():
 
     PASSWORD = dotenv.get_key(dotenv_path="./.env", key_to_get="DB_PASSWORD"); # Stores the password safely away.
     
-    # ========================== [DATABASE OPERATIONS] ================================== #
+    # ========================== [STEP 2: DATABASE OPERATIONS] ================================== #
     conn = psql.connect(
         host = "a1seng550dbi.cjcwea4ieepr.us-west-2.rds.amazonaws.com", # NOTE: Could change to input so I can swap between AWS and my local server.
         database="A1_SENG550_DBI",
@@ -137,18 +136,89 @@ def main():
             print("Delivery Insertion SUCCESS!\n");
         
 
+        # ============================== [STEP 3: ADD UPDATE DATA WITH PYTHON.] =========================
+        # Adding customer Liam, and his order and delivery.
+        psql_cursor.execute(
+            query="""
+            INSERT INTO customers (name, email, phone, address)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (name, email, phone, address)
+            DO NOTHING
+            RETURNING customer_id
+            """,
+            vars=("Liam Nelson", "liam.nelson@example.com", "555-2468", "111 Elm Street")
+        );
+        customer_id = None;
+        conn.commit();
+        if psql_cursor.rowcount > 0:
+            customer_id = psql_cursor.fetchone()[0];
+            print(f"{psql_cursor.rowcount} row(s) updated successfully.");
+        else:
+            print("No customer rows were updated.");
+
+        psql_cursor.execute(
+            query="""
+            INSERT INTO orders (customer_id, order_date, total_amount, product_id, product_category, product_name)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (customer_id, order_date, total_amount, product_id, product_category, product_name)
+            DO NOTHING
+            RETURNING order_id
+            """,
+            vars=(customer_id, "2025-06-01", "180.00", "116", "Electronics", "Bluetooth Speaker")
+        );
+        order_id = None;
+        conn.commit();
+        if psql_cursor.rowcount > 0:
+            order_id = psql_cursor.fetchone()[0];
+            print(f"{psql_cursor.rowcount} row(s) updated successfully.");
+        else:
+            print("No order rows were updated.");
+
+        psql_cursor.execute(
+            query="""
+            INSERT INTO deliveries (order_id, delivery_date, status) 
+            VALUES (%s, %s, %s)
+            ON CONFLICT (order_id, delivery_date, status)
+            DO NOTHING
+            RETURNING delivery_id
+            """,
+            vars=(order_id, "2025-06-03", "Pending")
+        );
+        delivery_id = None;
+        conn.commit();
+        if psql_cursor.rowcount > 0:
+            delivery_id = psql_cursor.fetchone()[0];
+            print(f"{psql_cursor.rowcount} row(s) updated successfully.");
+        else:
+            print("No delivery rows were updated.");
+
+        # Update Liam's delivery status to 'Shipped'
+        psql_cursor.execute(
+            query="""
+            UPDATE deliveries
+            SET status = %s
+            WHERE delivery_id = %s
+            """,
+            vars=("Shipped", delivery_id)
+        );
+        conn.commit();
+
+
+
         # Drop the tables (ONLY ALLOWED IF THE TABLES ALREADY EXIST.)
         if(want_to_delete == 1):
             print("Using bulk delete...\n");
             bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="deliveries", df_arg=del_df);
             bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="orders", df_arg=ord_df);
             bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="customers", df_arg=cust_df);
-
         # Close the cursor and database connection ALWAYS, when done.
         psql_cursor.close();
     
     conn.close();
+    print("END OF PROGRAM...\n");
     return;
 
+
+# =========================================================================================================================================================
 if __name__ == "__main__":
     main();
