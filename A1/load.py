@@ -156,6 +156,15 @@ def main():
         print("Connection to database was successful!\n");
         # Create a cursor to point to the SQL Database in order to make queries to it.
         psql_cursor = conn.cursor();
+
+        # Drop the tables (ONLY ALLOWED IF THE TABLES ALREADY EXIST.)
+        if(want_to_delete == 1):
+            print("Using bulk delete...\n");
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="deliveries", df_arg=del_df);
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="orders", df_arg=ord_df);
+            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="customers", df_arg=cust_df);
+            return;
+        
         # Insert bulk data into all 3 tables.
         cust_flag = 0; ord_flag = 0; del_flag = 0;
         
@@ -287,12 +296,7 @@ def main():
         );
         conn.commit();
 
-        # Drop the tables (ONLY ALLOWED IF THE TABLES ALREADY EXIST.)
-        if(want_to_delete == 1):
-            print("Using bulk delete...\n");
-            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="deliveries", df_arg=del_df);
-            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="orders", df_arg=ord_df);
-            bulk_delete(cursor_arg=psql_cursor, conn_arg=conn, table_name="customers", df_arg=cust_df);
+        
         # Close the cursor and database connection ALWAYS, when done.
         psql_cursor.close();
     
