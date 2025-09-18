@@ -28,13 +28,3 @@ CREATE TABLE IF NOT EXISTS deliveries
 	delivery_date DATE,
 	status TEXT
 );
-
-
-SELECT *
-FROM customers as c;
-
-SELECT *
-FROM orders as o;
-
-SELECT *
-FROM deliveries as d;
