@@ -6,6 +6,7 @@ __pycache__/
 # test.py file
 test.py
 backups/
+.vscode/
 
 # C extensions
 *.so

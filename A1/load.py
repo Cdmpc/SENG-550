@@ -145,7 +145,7 @@ def main():
         DATABASE_NAME = str("A1_SENG550_DBI");
     elif(db_server_in == "localhost"):
         ENDPOINT = str("localhost");
-        DATABASE_NAME = str("A1_SENG550_DBLOCAL");
+        DATABASE_NAME = str("A1_SENG550_LOCAL_FINAL");
     else:
         print("Endpoint string is NOT VALID, please add your endpoint to your own .env file under the key DB_ENDPOINT.");
         return;
