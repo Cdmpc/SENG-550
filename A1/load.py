@@ -85,7 +85,8 @@ def single_insert(table_name, row_dict, returning_col, cursor_arg, conn_arg):
     Args:
         table_name (str): Name of the table to insert into.
         row_dict (dict): A dictionary mapping column names -> values.
-        returning_col (str): Column name whose value should be returned (e.g., primary key).
+        returning_col (str): Column name whose value should be returned, based on a modidfiable query like INSERT, DELETE (e.g., primary key).
+            For getting specific data without needing a separate SELECT query, and needing it for future queries.
         cursor_arg (cursor): psycopg2 cursor object.
         conn_arg (connection): psycopg2 connection object.
     

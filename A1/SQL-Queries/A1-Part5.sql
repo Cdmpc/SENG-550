@@ -1,3 +1,4 @@
+
 -- Creating payments table, should be linked to customers and orders.
 -- Customers to payments is an optional 1-1 relationship.
 -- Orders to payments has a 1-M relationship, where a payment record can have multiple orders.
