@@ -49,7 +49,7 @@ def get_most_recent_product(product_id, cursor_arg, conn_arg):
             query=f"""
             SELECT *
             FROM dim_products
-            WHERE customer_id = {product_id}    
+            WHERE product_id = {product_id}    
             """
         );
         all_products = cursor_arg.fetchall();
@@ -167,9 +167,9 @@ def update_customer_city(customer_id, name, email, new_city, conn_arg, cursor_ar
         # Retire the old column with the old city. The id would be stored in 0th index of the tuple from the above function.
         cursor_arg.execute(
             query=f"""
-            UPDATE dim_customers AS dc
-            SET dc.valid_end_date = CURRENT_TIMESTAMP
-            WHERE dc.id = {most_recent_customer[0]}
+            UPDATE dim_customers
+            SET valid_end_date = CURRENT_TIMESTAMP
+            WHERE id = {most_recent_customer[0]}
             """
         )
         
@@ -180,7 +180,7 @@ def update_customer_city(customer_id, name, email, new_city, conn_arg, cursor_ar
         return new_customer_result;
     except Exception as e:
         conn_arg.rollback();
-        print(f"Updating customer city failed!\n");
+        print(f"Updating customer city failed!\n", e);
         return None;
 
 def update_product_price(product_id, name, category, new_price, conn_arg, cursor_arg):
@@ -195,9 +195,9 @@ def update_product_price(product_id, name, category, new_price, conn_arg, cursor
         # Retire the old product price.
         cursor_arg.execute(
             query=f"""
-            UPDATE dim_products AS dp
-            SET dp.valid_end_date = CURRENT_TIMESTAMP
-            WHERE dp.id = {most_recent_product[0]}
+            UPDATE dim_products
+            SET valid_end_date = CURRENT_TIMESTAMP
+            WHERE id = {most_recent_product[0]}
             """
         );
         new_product_result = add_product(product_id, name, category, new_price, conn_arg, cursor_arg);
@@ -262,26 +262,52 @@ def main():
     # Create a cursor to interact with the database.
     customer = tuple(); product = tuple(); order = tuple();
 
-    # BEGIN QUERIES:
+    # ============================== BEGIN QUERIES ======================================== :
     # 1. Add product P1 (Laptop, Electronics, $1000)
-    product = add_product(product_id=1, name="Laptop", category="Electronics", price="$1000.00", conn_arg=conn, cursor_arg=cursor);
+    add_product(product_id=1, name="Laptop", category="Electronics", price="$1000.00", conn_arg=conn, cursor_arg=cursor);
+
     # 2. Add product P2 (Phone, Electronics, $500)
-    product = add_product(product_id=2, name="Phone", category="Electronics", price="$500.00", conn_arg=conn, cursor_arg=cursor);
+    add_product(product_id=2, name="Phone", category="Electronics", price="$500.00", conn_arg=conn, cursor_arg=cursor);
+
     # 3. Add customer C1 (Alice, New York)
-    customer = add_customer(customer_id=1, name="Alice", email="", city="New York", conn_arg=conn, cursor_arg=cursor);
+    add_customer(customer_id=1, name="Alice", email="", city="New York", conn_arg=conn, cursor_arg=cursor);
+
     # 4. Add customer C2 (Bob, Boston)
-    customer = add_customer(customer_id=2, name="Bob", email="", city="Boston", conn_arg=conn, cursor_arg=cursor);
+    add_customer(customer_id=2, name="Bob", email="", city="Boston", conn_arg=conn, cursor_arg=cursor);
+
     # 5. Add order O1: C1 buys P1 for $1000
-    order = add_order(product_id=1, customer_id=1, amount="$1000", conn_arg=conn, cursor_arg=cursor);
+    add_order(product_id=1, customer_id=1, amount="$1000", conn_arg=conn, cursor_arg=cursor);
+
     # 6. Update C1’s city to Chicago
+    update_customer_city(customer_id=1, name=get_most_recent_customer(1, cursor, conn)[2], 
+                         email="", new_city="Chicago", conn_arg=conn, cursor_arg=cursor);
+    
     # 7. Update P1’s price to $900
+    update_product_price(product_id=1, name=get_most_recent_product(1, cursor, conn)[2], category=get_most_recent_product(1, cursor, conn)[3], 
+                         new_price="$900.00", conn_arg=conn, cursor_arg=cursor);
+    
     # 8. Add order O2: C1 buys P1 for $850
+    add_order(product_id=1, customer_id=1, amount="$850.00", conn_arg=conn, cursor_arg=cursor);
+
     # 9. Update C2’s city to Calgary
+    update_customer_city(customer_id=2, name=get_most_recent_customer(2, cursor, conn)[2], 
+                         email="", new_city="Calgary", conn_arg=conn, cursor_arg=cursor);
+    
     # 10. Add order O3: C2 buys P2 for $500
+    add_order(product_id=2, customer_id=2, amount="$500.00", conn_arg=conn, cursor_arg=cursor);
+
     # 11. Add order O4: C1 buys P1 for $900
+    add_order(product_id=1, customer_id=1, amount="$900.00", conn_arg=conn, cursor_arg=cursor);
+
     # 12. Update C1’s city to San Francisco
+    update_customer_city(customer_id=1, name=get_most_recent_customer(1, cursor, conn)[2], 
+                         email="", new_city="San Francisco", conn_arg=conn, cursor_arg=cursor);
+
     # 13. Add order O5: C1 buys P2 for $450
+    add_order(product_id=2, customer_id=1, amount="$450.00", conn_arg=conn, cursor_arg=cursor);
+
     # 14. Add order O6: C2 buys P1 for $900
+    add_order(product_id=2, customer_id=1, amount="$900.00", conn_arg=conn, cursor_arg=cursor);
 
 
 if __name__ == "__main__":
