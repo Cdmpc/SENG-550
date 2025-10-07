@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS dim_products
 	product_id INT NOT NULL, -- product business key, can be duplicated.
 	name TEXT NOT NULL,
 	category TEXT,
-	price MONEY,
+	price NUMERIC,
 	valid_start_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	valid_end_date TIMESTAMP,
 	UNIQUE(product_id, name, category, price)
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS fact_orders
 	customer_id INT NOT NULL, -- Foreign Key to dim_customer surrogate key
 	order_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	-- amount is the actual price paid, due to discounts or other special offers.
-	amount MONEY,
+	amount NUMERIC,
 	UNIQUE(product_id, customer_id, amount),
 	-- Create the FK references to the dim table surrogate keys.
 	FOREIGN KEY (product_id) REFERENCES dim_products(id),

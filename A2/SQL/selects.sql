@@ -1,11 +1,11 @@
 SELECT *
 FROM dim_customers
-ORDER BY id ASC
+ORDER BY customer_id ASC
 ;
 
 SELECT *
 FROM dim_products
-ORDER BY id ASC
+ORDER BY product_id ASC
 ;
 
 SELECT *
