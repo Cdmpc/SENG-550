@@ -79,10 +79,14 @@ def main():
             ON fo.customer_id = dc.customer_id
             AND fo.order_date BETWEEN dc.valid_start_date
             AND COALESCE(dc.valid_end_date, CURRENT_TIMESTAMP);
-
+        -- Rename the column, because otherwise it will get deleted in the natural join
+        -- and it helps to differentiate it from "name" in dim_products.
         ALTER TABLE customer_orders
         RENAME COLUMN name TO customer_name;
+        SELECT *
+        FROM customer_orders;
 
+        -- Join and return the relationship attributes requested from products and orders
         DROP TABLE IF EXISTS product_orders CASCADE;
         CREATE TEMPORARY TABLE IF NOT EXISTS product_orders AS
         SELECT dp.product_id, dp.name, dp.price, fo.order_id, fo.order_date, fo.amount
@@ -94,7 +98,11 @@ def main():
 
         ALTER TABLE product_orders
         RENAME COLUMN name TO product_name;
+        SELECT *
+        FROM product_orders;
 
+        -- Join customer_orders and product_orders ON the order columns, since they are the same
+        -- in both temp tables.
         SELECT order_id, order_date, customer_id, customer_name, city AS customer_city, 
         product_id, product_name, price AS product_price, amount
         FROM customer_orders AS co
@@ -105,16 +113,15 @@ def main():
     # Use pandas to read the database query, and store them into a dataframe.
     df = pd.read_sql_query(sql, engine);
 
+    # Transform the NaT (Not a Time, which can be NULL values), to None Type to insert into the collection.
+    df = df.replace({pd.NaT: None});
+
     # Convert the dataframe rows to a list of dictionaries so MongoDB can read them.
     mongo_documents = df.to_dict("records");
     
     # Insert the documents into mongodb.
     orders_summary.insert_many(mongo_documents);
     print(f"Inserted {len(mongo_documents)} documents into MongoDB!");
-
-    # Close the MongoDB and PostgreSQL connection.
-    pg_conn.close();
-    mongo_cli.close();
 
 if __name__ == "__main__":
     main();

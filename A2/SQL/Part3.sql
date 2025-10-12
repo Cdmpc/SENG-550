@@ -78,4 +78,3 @@ product_id, product_name, price AS product_price, amount
 FROM customer_orders AS co
 NATURAL JOIN product_orders
 WHERE customer_id = 1;
-	
