@@ -77,6 +77,7 @@ db.getCollection("orders_summary").aggregate([
 use("sales_db");
 db.getCollection("orders_summary").aggregate([
   {
+    // WHERE customer_id = 1. Corresponding to C1 which is Alice.
     $match: {
       customer_id: 1,
     },
